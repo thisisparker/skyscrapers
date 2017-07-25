@@ -9,22 +9,23 @@ class Window {
 	}
 
 	render(ctx) {
-		ctx.fillStyle = 'yellow';
 		if (this.isLit) {
+			ctx.fillStyle = 'yellow';
 			ctx.fillRect(this.x, this.y, 6, 6);
-		} else {
-			ctx.strokeRect(this.x, this.y, 6, 6);
 		}
 	}
 
 }
 
 class Building {
-	constructor(x)  {
+	constructor(x, buildingRow)  {
 		this.height = getRandomInt(60,300);
 		this.width = 80;
-		this.x = x;
-		this.y = ctxheight - 40 - this.height;
+		this.x = x + buildingRow * 10;
+		this.row = buildingRow;
+
+		this.y = ctxheight - 30 - this.height + 5 * this.row;
+
 		var windowRows = Math.floor(this.height / 8) - 1;
 		var windowCols = Math.floor(this.width/ 8) - 1;
 		this.windowGrid = [];
@@ -38,7 +39,8 @@ class Building {
 	}
 
 	render(ctx) {
-		ctx.fillStyle = 'black';
+		let buildingColors = ['silver','grey','black'];
+		ctx.fillStyle = buildingColors[this.row];
 		ctx.fillRect(this.x, this.y, this.width, this.height);
 
 		for (var windowRow of this.windowGrid) {
@@ -57,12 +59,6 @@ function getRandomInt(min, max) {
 }
 
 function draw() {
-					
-	if (!canvas.getContext) {
-		return;
-	}
-
-
 	var skygrad = ctx.createLinearGradient(0, 0, 0, ctxheight);
 	skygrad.addColorStop(1, '#30cfd0');
 	skygrad.addColorStop(0, '#330867');
@@ -74,32 +70,21 @@ function draw() {
 	ctx.fillStyle = '#222';
 	ctx.fillRect(0, ctxheight - 40, ctxwidth, 40);
 
-	var building = new Building(50);
+	var buildingGrid = [];
+	
+	for (var buildingRow = 0; buildingRow < 3; buildingRow ++) {
+		buildingGrid[buildingRow] = [];
+		for (let i = 0; i < ctxwidth / 85; i++) {
+			buildingGrid[buildingRow][i] = 
+				Math.random() > 0.2 ?
+				new Building(15 + i * 85, buildingRow) : null;
+		}
+	}
 
-	building.render(ctx);
-//	var rows = 3;
-//
-//	for (var row = 0; row < rows; row++){
-//		var colorarray = ['silver','gray','black'];
-//
-//		for (var i = 5; i < ctxwidth; i += 85) {
-//			var buildheight = getRandomInt(60, 300);
-//			var buildx = i + row * 10;
-//			ctx.fillStyle = colorarray[row];
-//
-//			if (Math.random() > 0.2) {
-//
-//				ctx.fillRect(buildx, 
-//						ctxheight - buildheight - 30 + row * 5, 
-//						80,	buildheight);
-//
-//				// Paint on the windows
-//
-//				A
-//					}
-//					}
-//				}
-//			}
-//		}
-//	}
+	
+	for (var buildingRow of buildingGrid) {
+		for (var building of buildingRow) {
+			if (building) { building.render(ctx); }
+		}
+	}
 }
