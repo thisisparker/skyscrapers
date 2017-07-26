@@ -44,6 +44,7 @@ class Building {
 		for (var i = 0; i < this.windowGrid.length; i++) {
 			for (var j = 0; j < this.windowGrid[i].length; j++) {
 				this.windowGrid[i][j].x = this.x + 5 + j * 8;
+				if (Math.random() < .0005) {this.windowGrid[i][j].isLit ^= true}
 			}
 		}
 	}
@@ -77,14 +78,13 @@ class Backdrop {
 }
 
 class Scene {
-	constructor() {
-		this.loop = this.loop.bind(this);
-		
+	constructor(origin = 0) {
 		this.buildingGrid = [];
+		this.origin = origin;
 	
 		for (var buildingRow = 0; buildingRow < 3; buildingRow ++) {
 			this.buildingGrid[buildingRow] = [];
-			for (let i = 0; i < ctxwidth / 85; i++) {
+			for (let i = this.origin; i < ctxwidth / 85; i++) {
 				this.buildingGrid[buildingRow][i] = 
 				Math.random() > 0.2 ?
 				new Building(i * 85 - buildingRow * 10, buildingRow) : null;
@@ -92,6 +92,14 @@ class Scene {
 		}
 
 		this.backdrop = new Backdrop();
+	}
+
+	update() {
+		for (var buildingRow of this.buildingGrid) {
+			for (var building of buildingRow) {
+				if (building) { building.update(); }
+			}
+		}
 	}
 
 	render(ctx) {
@@ -107,8 +115,16 @@ class Scene {
 		this.img.src = canvas.toDataURL('image/png');
 	}
 
+}
+
+class World {
+	constructor() {
+		this.loop = this.loop.bind(this);
+		this.scene = new Scene();
+		this.nextscene = new Scene(ctxwidth);
+	}
+
 	startLoop(ctx) {
-		this.render(ctx);
 		this.offset = ctxwidth;
 		requestAnimationFrame(this.loop);
 	}
@@ -116,20 +132,21 @@ class Scene {
 	loop() {
 		ctx.clearRect(0, 0, ctxwidth, ctxheight);
 		
-		this.offset -= 4;
-		if (this.offset <= 0) { this.offset = ctxwidth }
+		if (this.offset <= 0) { 
+			this.scene = this.nextscene;
+			this.nextscene = new Scene(ctxwidth);	
+			this.offset = ctxwidth; }
 
-		ctx.drawImage(this.img, this.offset - ctxwidth, 0, ctxwidth, ctxheight);
-		ctx.drawImage(this.img, this.offset, 0, ctxwidth, ctxheight);
-		
+//		ctx.drawImage(this.img, this.offset - ctxwidth, 0, ctxwidth, ctxheight);
+//		ctx.drawImage(this.img, this.offset, 0, ctxwidth, ctxheight);
 
-//		for (var buildingRow of this.buildingGrid) {
-//			for (var building of buildingRow) {
-//				if (building) { building.update() }
-//			}
-//		}
+		this.nextscene.render(ctx);
+		this.scene.render(ctx);
 
-//		this.render(ctx);
+		this.scene.update();
+		this.nextscene.update();
+
+		this.offset -= 1;
 
 		requestAnimationFrame(this.loop);
 	}
@@ -145,6 +162,6 @@ function getRandomInt(min, max) {
 function draw() {
 	ctx.clearRect(0, 0, ctxwidth, ctxheight);
 	
-	const scene = new Scene();
-	scene.startLoop(ctx);
+	var world = new World();
+	world.startLoop(ctx);
 }
