@@ -38,13 +38,13 @@ class Building {
 		}
 	}
 
-	update() {
+	update(offset) {
+		this.offset = offset;
 		this.x -= 4;
-		if (this.x < -80) { this.x = ctxwidth }
 		for (var i = 0; i < this.windowGrid.length; i++) {
 			for (var j = 0; j < this.windowGrid[i].length; j++) {
 				this.windowGrid[i][j].x = this.x + 5 + j * 8;
-				if (Math.random() < .0005) {this.windowGrid[i][j].isLit ^= true}
+				if (Math.random() < .00005) {this.windowGrid[i][j].isLit ^= true}
 			}
 		}
 	}
@@ -63,6 +63,10 @@ class Building {
 }
 
 class Backdrop {
+	constructor(origin = 0) {
+		this.origin = origin;
+	}
+
 	render(ctx) {
 		let skygrad = ctx.createLinearGradient(0, 0, 0, ctxheight);
 		skygrad.addColorStop(1, '#30cfd0');
@@ -79,40 +83,40 @@ class Backdrop {
 
 class Scene {
 	constructor(origin = 0) {
+		console.log("I'm drawing a new screen");
 		this.buildingGrid = [];
 		this.origin = origin;
 	
 		for (var buildingRow = 0; buildingRow < 3; buildingRow ++) {
 			this.buildingGrid[buildingRow] = [];
-			for (let i = this.origin; i < ctxwidth / 85; i++) {
+			for (let i = 0; i < ctxwidth / 85; i++) {
 				this.buildingGrid[buildingRow][i] = 
 				Math.random() > 0.2 ?
-				new Building(i * 85 - buildingRow * 10, buildingRow) : null;
+				new Building(
+					this.origin + i * 85 - buildingRow * 10, buildingRow) : null;
 			}
 		}
 
-		this.backdrop = new Backdrop();
 	}
 
-	update() {
+	update(offset) {
+		this.offset = offset;
 		for (var buildingRow of this.buildingGrid) {
 			for (var building of buildingRow) {
-				if (building) { building.update(); }
+				if (building) { building.update(this.offset); }
 			}
 		}
 	}
 
 	render(ctx) {
-		this.backdrop.render(ctx);
-
 		for (var buildingRow of this.buildingGrid) {
 			for (var building of buildingRow) {
 				if (building) { building.render(ctx); }
 			}
 		}
 
-		this.img = new Image();
-		this.img.src = canvas.toDataURL('image/png');
+//		this.img = new Image();
+//		this.img.src = canvas.toDataURL('image/png');
 	}
 
 }
@@ -122,6 +126,8 @@ class World {
 		this.loop = this.loop.bind(this);
 		this.scene = new Scene();
 		this.nextscene = new Scene(ctxwidth);
+
+		this.backdrop = new Backdrop();
 	}
 
 	startLoop(ctx) {
@@ -131,11 +137,14 @@ class World {
 
 	loop() {
 		ctx.clearRect(0, 0, ctxwidth, ctxheight);
-		
+		this.backdrop.render(ctx);	
+		this.offset -= 4;
+
 		if (this.offset <= 0) { 
 			this.scene = this.nextscene;
-			this.nextscene = new Scene(ctxwidth);	
-			this.offset = ctxwidth; }
+			this.offset = ctxwidth; 
+			this.nextscene = new Scene(this.offset);	
+		}
 
 //		ctx.drawImage(this.img, this.offset - ctxwidth, 0, ctxwidth, ctxheight);
 //		ctx.drawImage(this.img, this.offset, 0, ctxwidth, ctxheight);
@@ -143,10 +152,8 @@ class World {
 		this.nextscene.render(ctx);
 		this.scene.render(ctx);
 
-		this.scene.update();
-		this.nextscene.update();
-
-		this.offset -= 1;
+		this.nextscene.update(this.offset);
+		this.scene.update(this.offset);
 
 		requestAnimationFrame(this.loop);
 	}
