@@ -40,7 +40,7 @@ class Building {
 
 	update() {
 		this.x -= 4;
-		if (this.x < -85) { this.x = ctxwidth }
+		if (this.x < -80) { this.x = ctxwidth }
 		for (var i = 0; i < this.windowGrid.length; i++) {
 			for (var j = 0; j < this.windowGrid[i].length; j++) {
 				this.windowGrid[i][j].x = this.x + 5 + j * 8;
@@ -87,7 +87,7 @@ class Scene {
 			for (let i = 0; i < ctxwidth / 85; i++) {
 				this.buildingGrid[buildingRow][i] = 
 				Math.random() > 0.2 ?
-				new Building(i * 85 + buildingRow * 10, buildingRow) : null;
+				new Building(i * 85 - buildingRow * 10, buildingRow) : null;
 			}
 		}
 
