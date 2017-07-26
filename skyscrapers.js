@@ -102,22 +102,34 @@ class Scene {
 				if (building) { building.render(ctx); }
 			}
 		}
+
+		this.img = new Image();
+		this.img.src = canvas.toDataURL('image/png');
 	}
 
 	startLoop(ctx) {
+		this.render(ctx);
+		this.offset = ctxwidth;
 		requestAnimationFrame(this.loop);
 	}
 
 	loop() {
 		ctx.clearRect(0, 0, ctxwidth, ctxheight);
+		
+		this.offset -= 4;
+		if (this.offset <= 0) { this.offset = ctxwidth }
 
-		for (var buildingRow of this.buildingGrid) {
-			for (var building of buildingRow) {
-				if (building) { building.update() }
-			}
-		}
+		ctx.drawImage(this.img, this.offset - ctxwidth, 0, ctxwidth, ctxheight);
+		ctx.drawImage(this.img, this.offset, 0, ctxwidth, ctxheight);
+		
 
-		this.render(ctx);
+//		for (var buildingRow of this.buildingGrid) {
+//			for (var building of buildingRow) {
+//				if (building) { building.update() }
+//			}
+//		}
+
+//		this.render(ctx);
 
 		requestAnimationFrame(this.loop);
 	}
