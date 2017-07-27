@@ -67,21 +67,22 @@ class Backdrop {
 		this.origin = origin;
 		this.hours = new Date().getHours();
 
-		if (this.hours >= 7 && this.hours <= 20) {
-			this.mode = "day";
-		} else { this.mode = "night" }
+		if (this.hours < 6 || this.hours > 19) { this.mode = "night"; }
+		else if (this.hours === 6 || this.hours === 19) {this.mode = "twilight";}
+		else if (this.hours > 6 && this.hours < 19) { this.mode = "day"; }
 
 		this.grad = ctx.createLinearGradient(0, 0, 0, ctxheight);
 
 		if (this.mode === "day") {
-			this.grad.addColorStop(0, '#f6d365');
-			this.grad.addColorStop(1, '#fda085');
+			this.grad.addColorStop(0, '#48c6ef');
+			this.grad.addColorStop(1, '#6f86d6');
+		} else if (this.mode === "twilight") {
+			this.grad.addColorStop(0, '#fa709a');
+			this.grad.addColorStop(1, '#fee140');
 		} else if (this.mode === "night") {
 			this.grad.addColorStop(0, '#330867');
 			this.grad.addColorStop(1, '#30cfd0');
-
 		}
-				
 	}
 
 	render(ctx) {
