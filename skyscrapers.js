@@ -38,9 +38,9 @@ class Building {
 		}
 	}
 
-	update(offset) {
-		this.offset = offset;
-		this.x -= 4;
+	update(rate) {
+		this.rate = rate;
+		this.x -= rate;
 		for (var i = 0; i < this.windowGrid.length; i++) {
 			for (var j = 0; j < this.windowGrid[i].length; j++) {
 				this.windowGrid[i][j].x = this.x + 5 + j * 8;
@@ -65,14 +65,27 @@ class Building {
 class Backdrop {
 	constructor(origin = 0) {
 		this.origin = origin;
+		this.hours = new Date().getHours();
+
+		if (this.hours >= 7 && this.hours <= 20) {
+			this.mode = "day";
+		} else { this.mode = "night" }
+
+		this.grad = ctx.createLinearGradient(0, 0, 0, ctxheight);
+
+		if (this.mode === "day") {
+			this.grad.addColorStop(0, '#f6d365');
+			this.grad.addColorStop(1, '#fda085');
+		} else if (this.mode === "night") {
+			this.grad.addColorStop(0, '#330867');
+			this.grad.addColorStop(1, '#30cfd0');
+
+		}
+				
 	}
 
 	render(ctx) {
-		let skygrad = ctx.createLinearGradient(0, 0, 0, ctxheight);
-		skygrad.addColorStop(1, '#30cfd0');
-		skygrad.addColorStop(0, '#330867');
-
-		ctx.fillStyle = skygrad;
+		ctx.fillStyle = this.grad;
 
 		ctx.fillRect(0, 0, ctxwidth, ctxheight - 40);
 
@@ -83,13 +96,12 @@ class Backdrop {
 
 class Scene {
 	constructor(origin = 0) {
-		console.log("I'm drawing a new screen");
 		this.buildingGrid = [];
 		this.origin = origin;
 	
 		for (var buildingRow = 0; buildingRow < 3; buildingRow ++) {
 			this.buildingGrid[buildingRow] = [];
-			for (let i = 0; i < ctxwidth / 85; i++) {
+			for (let i = 0; i < (ctxwidth / 85) - 1; i++) {
 				this.buildingGrid[buildingRow][i] = 
 				Math.random() > 0.2 ?
 				new Building(
@@ -99,11 +111,11 @@ class Scene {
 
 	}
 
-	update(offset) {
-		this.offset = offset;
+	update(rate) {
+		this.rate = rate;
 		for (var buildingRow of this.buildingGrid) {
 			for (var building of buildingRow) {
-				if (building) { building.update(this.offset); }
+				if (building) { building.update(this.rate); }
 			}
 		}
 	}
@@ -114,11 +126,7 @@ class Scene {
 				if (building) { building.render(ctx); }
 			}
 		}
-
-//		this.img = new Image();
-//		this.img.src = canvas.toDataURL('image/png');
 	}
-
 }
 
 class World {
@@ -137,8 +145,9 @@ class World {
 
 	loop() {
 		ctx.clearRect(0, 0, ctxwidth, ctxheight);
-		this.backdrop.render(ctx);	
-		this.offset -= 4;
+		this.backdrop.render(ctx);
+		this.rate = 4;
+		this.offset -= this.rate;
 
 		if (this.offset <= 0) { 
 			this.scene = this.nextscene;
@@ -152,8 +161,8 @@ class World {
 		this.nextscene.render(ctx);
 		this.scene.render(ctx);
 
-		this.nextscene.update(this.offset);
-		this.scene.update(this.offset);
+		this.nextscene.update(this.rate);
+		this.scene.update(this.rate);
 
 		requestAnimationFrame(this.loop);
 	}
