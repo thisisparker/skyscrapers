@@ -14,7 +14,6 @@ class Window {
 			ctx.fillRect(this.x, this.y, 6, 6);
 		}
 	}
-
 }
 
 class Building {
@@ -67,9 +66,16 @@ class Backdrop {
 		this.origin = origin;
 		this.hours = new Date().getHours();
 
-		if (this.hours < 6 || this.hours > 19) { this.mode = "night"; }
-		else if (this.hours === 6 || this.hours === 19) {this.mode = "twilight";}
-		else if (this.hours > 6 && this.hours < 19) { this.mode = "day"; }
+		this.time = new Date();
+		const times = SunCalc.getTimes(new Date(), 40.75, -73.98);
+
+		if (Math.abs(this.time - times.sunrise) < 1800000 || Math.abs(this.time - times.sunset) < 1800000) { 
+			this.mode = "twilight";
+	   	} else if (this.time < times.sunrise || this.time > times.sunset) { 
+			this.mode = "night";
+		} else {
+			this.mode = "day";
+		}
 
 		this.grad = ctx.createLinearGradient(0, 0, 0, ctxheight);
 
@@ -179,6 +185,7 @@ function getRandomInt(min, max) {
 function draw() {
 	ctx.clearRect(0, 0, ctxwidth, ctxheight);
 	
+
 	var world = new World();
 	world.startLoop(ctx);
 }
