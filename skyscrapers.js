@@ -1,7 +1,7 @@
 class Window {
 	constructor(x, y) {
-		this.width = 6;
-		this.height = 6;
+		this.width = 10;
+		this.height = 10;
 		this.x = x;
 	   	this.y = y;	
 
@@ -11,7 +11,7 @@ class Window {
 	render(ctx) {
 		if (this.isLit) {
 			ctx.fillStyle = 'yellow';
-			ctx.fillRect(this.x, this.y, 6, 6);
+			ctx.fillRect(this.x, this.y, this.width, this.height);
 		}
 	}
 }
@@ -25,14 +25,14 @@ class Building {
 
 		this.y = ctxheight - 30 - this.height + 5 * this.row;
 
-		var windowRows = Math.floor(this.height / 8) - 1;
-		var windowCols = Math.floor(this.width/ 8) - 1;
+		var windowRows = Math.floor(this.height / 15) - 1;
+		var windowCols = Math.floor(this.width / 15);
 		this.windowGrid = [];
 		for (var i = 0; i < windowRows; i++) {
 			this.windowGrid[i] = [];
 			for (var j = 0; j < windowCols; j++) {
 				this.windowGrid[i][j] = 
-					new Window(this.x + 5 + j * 8, this.y +	5 + i * 8);
+					new Window(this.x + 5 + j * 15, this.y + 5 + i * 15);
 			}
 		}
 	}
@@ -42,7 +42,7 @@ class Building {
 		this.x -= rate;
 		for (var i = 0; i < this.windowGrid.length; i++) {
 			for (var j = 0; j < this.windowGrid[i].length; j++) {
-				this.windowGrid[i][j].x = this.x + 5 + j * 8;
+				this.windowGrid[i][j].x = this.x + 5 + j * 15;
 				if (Math.random() < .00005) {this.windowGrid[i][j].isLit ^= true}
 			}
 		}
@@ -115,7 +115,6 @@ class Scene {
 					this.origin + i * 85 - buildingRow * 10, buildingRow) : null;
 			}
 		}
-
 	}
 
 	update(rate) {
